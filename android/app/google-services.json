@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "754986498184",
+    "project_id": "flutter-note-taker-1686c",
+    "storage_bucket": "flutter-note-taker-1686c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754986498184:android:50a3e212a39863df58873d",
+        "android_client_info": {
+          "package_name": "com.example.notetaker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2OwKiOJPBUqJPI7BZ8vXiUEHxZNTh6ZA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
