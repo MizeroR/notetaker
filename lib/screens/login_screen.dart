@@ -41,13 +41,13 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       if (_isSignUp) {
         await authProvider.signUp(email, password);
-        _showSnackBar('Account created successfully!');
+        if (mounted) _showSnackBar('Account created successfully!');
       } else {
         await authProvider.signIn(email, password);
-        _showSnackBar('Signed in successfully!');
+        if (mounted) _showSnackBar('Signed in successfully!');
       }
     } catch (e) {
-      _showSnackBar(e.toString(), isError: true);
+      if (mounted) _showSnackBar(e.toString(), isError: true);
     }
   }
 
