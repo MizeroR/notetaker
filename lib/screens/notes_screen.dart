@@ -22,15 +22,20 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-      ),
-    );
+    if (mounted) {
+      // ✅ Guard this too
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Colors.red : Colors.green,
+        ),
+      );
+    }
   }
 
   Future<void> _fetchNotes() async {
+    if (!mounted) return; // ✅ Early return if not mounted
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final notesProvider = Provider.of<NotesProvider>(context, listen: false);
 
@@ -38,16 +43,23 @@ class _NotesScreenState extends State<NotesScreen> {
       try {
         await notesProvider.fetchNotes(authProvider.user!.uid);
       } catch (e) {
-        _showSnackBar('Failed to fetch notes: ${e.toString()}', isError: true);
+        if (mounted) {
+          _showSnackBar('Failed to fetch notes: ${e.toString()}',
+              isError: true);
+        }
       }
     }
   }
 
   Future<void> _addNote() async {
+    if (!mounted) return; // ✅ Early return if not mounted
+
     final result = await showDialog<String>(
       context: context,
       builder: (context) => const AddEditNoteDialog(),
     );
+
+    if (!mounted) return; // ✅ Check after dialog
 
     if (result != null && result.isNotEmpty) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -55,18 +67,24 @@ class _NotesScreenState extends State<NotesScreen> {
 
       try {
         await notesProvider.addNote(result, authProvider.user!.uid);
-        _showSnackBar('Note added successfully!');
+        if (mounted) _showSnackBar('Note added successfully!');
       } catch (e) {
-        _showSnackBar('Failed to add note: ${e.toString()}', isError: true);
+        if (mounted) {
+          _showSnackBar('Failed to add note: ${e.toString()}', isError: true);
+        }
       }
     }
   }
 
   Future<void> _editNote(String id, String currentText) async {
+    if (!mounted) return; // ✅ Early return if not mounted
+
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AddEditNoteDialog(initialText: currentText),
     );
+
+    if (!mounted) return; // ✅ Check after dialog
 
     if (result != null && result.isNotEmpty && result != currentText) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -74,14 +92,19 @@ class _NotesScreenState extends State<NotesScreen> {
 
       try {
         await notesProvider.updateNote(id, result, authProvider.user!.uid);
-        _showSnackBar('Note updated successfully!');
+        if (mounted) _showSnackBar('Note updated successfully!');
       } catch (e) {
-        _showSnackBar('Failed to update note: ${e.toString()}', isError: true);
+        if (mounted) {
+          _showSnackBar('Failed to update note: ${e.toString()}',
+              isError: true);
+        }
       }
     }
   }
 
   Future<void> _deleteNote(String id) async {
+    if (!mounted) return; // ✅ Early return if not mounted
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -100,26 +123,35 @@ class _NotesScreenState extends State<NotesScreen> {
       ),
     );
 
+    if (!mounted) return; // ✅ Check after dialog
+
     if (confirmed == true) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final notesProvider = Provider.of<NotesProvider>(context, listen: false);
 
       try {
         await notesProvider.deleteNote(id, authProvider.user!.uid);
-        _showSnackBar('Note deleted successfully!');
+        if (mounted) _showSnackBar('Note deleted successfully!');
       } catch (e) {
-        _showSnackBar('Failed to delete note: ${e.toString()}', isError: true);
+        if (mounted) {
+          _showSnackBar('Failed to delete note: ${e.toString()}',
+              isError: true);
+        }
       }
     }
   }
 
   Future<void> _signOut() async {
+    if (!mounted) return; // ✅ Early return if not mounted
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     try {
       await authProvider.signOut();
-      _showSnackBar('Signed out successfully!');
+      if (mounted) _showSnackBar('Signed out successfully!');
     } catch (e) {
-      _showSnackBar('Failed to sign out: ${e.toString()}', isError: true);
+      if (mounted) {
+        _showSnackBar('Failed to sign out: ${e.toString()}', isError: true);
+      }
     }
   }
 
@@ -140,7 +172,9 @@ class _NotesScreenState extends State<NotesScreen> {
       body: Consumer<NotesProvider>(
         builder: (context, notesProvider, child) {
           if (notesProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
           if (notesProvider.notes.isEmpty) {
@@ -148,11 +182,18 @@ class _NotesScreenState extends State<NotesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.note_add_outlined, size: 64, color: Colors.grey),
+                  Icon(
+                    Icons.note_add_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   SizedBox(height: 16),
                   Text(
                     'Nothing here yet—tap ➕ to add a note.',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
