@@ -8,7 +8,12 @@ import 'screens/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // If already initialized, ignore
+    print('Firebase already initialized: $e');
+  }
   runApp(const MyApp());
 }
 
