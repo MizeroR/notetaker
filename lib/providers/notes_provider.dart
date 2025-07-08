@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import '../models/note.dart';
 import '../services/notes_service.dart';
+import '../services/auth_service.dart';
 
 class NotesProvider extends ChangeNotifier {
   final NotesService _notesService = NotesService();
+  final AuthService _authService = AuthService();
   List<Note> _notes = [];
   bool _isLoading = false;
 
   List<Note> get notes => _notes;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchNotes(String userId) async {
-    try {
-      _isLoading = true;
-      notifyListeners();
+  Future<void> fetchNotes() async {
+    final user = _authService.currentUser;
+    if (user == null) return;
 
-      _notes = await _notesService.fetchNotes(userId);
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _notes = await _notesService.fetchNotes(user.uid);
     } catch (e) {
       rethrow;
     } finally {
@@ -24,28 +29,30 @@ class NotesProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addNote(String text, String userId) async {
+  Future<void> addNote(String text) async {
+    final user = _authService.currentUser;
+    if (user == null) throw 'User not authenticated';
     try {
-      await _notesService.addNote(text, userId);
-      await fetchNotes(userId);
+      await _notesService.addNote(text, user.uid);
+      await fetchNotes();
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> updateNote(String id, String text, String userId) async {
+  Future<void> updateNote(String id, String text) async {
     try {
       await _notesService.updateNote(id, text);
-      await fetchNotes(userId);
+      await fetchNotes();
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> deleteNote(String id, String userId) async {
+  Future<void> deleteNote(String id) async {
     try {
       await _notesService.deleteNote(id);
-      await fetchNotes(userId);
+      await fetchNotes();
     } catch (e) {
       rethrow;
     }
