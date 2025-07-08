@@ -1,8 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../models/note.dart';
 
 class NotesService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore get _firestore {
+    if (Firebase.apps.isEmpty) {
+      throw Exception('Firebase not initialized');
+    }
+    return FirebaseFirestore.instance;
+  }
   final String _collection = 'notes';
 
   Future<List<Note>> fetchNotes(String userId) async {
@@ -14,7 +20,13 @@ class NotesService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => Note.fromMap(doc.data(), doc.id))
+          .map((doc) {
+            final data = doc.data();
+            if (data.isEmpty) return null;
+            return Note.fromMap(data, doc.id);
+          })
+          .where((note) => note != null)
+          .cast<Note>()
           .toList();
     } catch (e) {
       throw 'Failed to fetch notes: ${e.toString()}';

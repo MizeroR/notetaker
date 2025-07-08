@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
@@ -12,10 +13,23 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _user != null;
 
   AuthProvider() {
-    _authService.authStateChanges.listen((User? user) {
-      _user = user;
-      notifyListeners();
-    });
+    _initializeAuth();
+  }
+
+  void _initializeAuth() {
+    try {
+      _authService.authStateChanges.listen(
+        (User? user) {
+          _user = user;
+          notifyListeners();
+        },
+        onError: (error) {
+          debugPrint('Auth state change error: $error');
+        },
+      );
+    } catch (e) {
+      debugPrint('Auth initialization error: $e');
+    }
   }
 
   Future<void> signIn(String email, String password) async {

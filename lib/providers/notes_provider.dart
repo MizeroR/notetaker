@@ -14,7 +14,11 @@ class NotesProvider extends ChangeNotifier {
 
   Future<void> fetchNotes() async {
     final user = _authService.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      _notes = [];
+      notifyListeners();
+      return;
+    }
 
     _isLoading = true;
     notifyListeners();
@@ -22,6 +26,7 @@ class NotesProvider extends ChangeNotifier {
     try {
       _notes = await _notesService.fetchNotes(user.uid);
     } catch (e) {
+      _notes = [];
       rethrow;
     } finally {
       _isLoading = false;
