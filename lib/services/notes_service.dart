@@ -16,10 +16,9 @@ class NotesService {
       final querySnapshot = await _firestore
           .collection(_collection)
           .where('userId', isEqualTo: userId)
-          .orderBy('updatedAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final notes = querySnapshot.docs
           .map((doc) {
             final data = doc.data();
             if (data.isEmpty) return null;
@@ -28,6 +27,10 @@ class NotesService {
           .where((note) => note != null)
           .cast<Note>()
           .toList();
+      
+      // Sort by updatedAt in descending order
+      notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      return notes;
     } catch (e) {
       throw 'Failed to fetch notes: ${e.toString()}';
     }
